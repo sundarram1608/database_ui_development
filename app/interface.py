@@ -124,3 +124,5 @@ def create_tabs_for_analytics():
 
         with st.expander("Sales by Employee"):
             show_employee_sales()
+
+
