@@ -65,7 +65,8 @@ pip install -r requirements.txt
 - Now,  Start the MYSQL Server from your settings. <br>
 - Open MYSQL Workbench and open the `database_creation.sql` and run all the codes.<br>
 - Database is created.
-- Now, in the terminal, navigate to the folder containing `Home.py`
+- Now, in the terminal, navigate to the folder containing `Home.py`.
+
 ```bash
 cd "path to Home.py"
 ```
