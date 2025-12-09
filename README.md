@@ -10,10 +10,13 @@ This project presents the design and development of a comprehensive Data Managem
 •	UI Layer  - Streamlit for the user interface<br>
 
 ## Project Structure: <br>
-The repo consists of 3 folders:<br>
+The repo consists of 3 folders & 2 files:<br>
 > app<br>
 > database_creation_mysql<br>
 > reports <br>
+> requirements.txt <br>
+> README.md <br>
+
 
 **app**<br>
 - This folder contains the folder named `pages`, that contains the python files `1_Data_Management_CRUD.py` & `2_Analytics_Dashboard.py`. These are the two pages of the UI<br>
@@ -25,6 +28,12 @@ The repo consists of 3 folders:<br>
 
 **reports** <br>
 - This folder contains the final project report. 
+
+**requirements.txt** <br>
+- This file contains the libraries necessary for application creation.<br>
+
+**README.md** <br>
+- This current file you are reading containing all details. <br>
 
 ## How to use this repository? <br>
 Follow the steps below, to experiment with my code:<br>
