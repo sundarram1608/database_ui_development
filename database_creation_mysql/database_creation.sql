@@ -1,4 +1,4 @@
-DROP DATABASE northwind;
+-- DROP DATABASE northwind;
 CREATE DATABASE northwind;
 USE northwind;
 SHOW DATABASES;
@@ -22,6 +22,9 @@ CREATE TABLE `Employees` (
 						  `Notes` TEXT NULL,
 						  `ReportsTo` INT NULL,
 						  `PhotoPath` VARCHAR(255) NULL,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						  CONSTRAINT `PK_Employees` PRIMARY KEY (`EmployeeID`),
 						  CONSTRAINT `FK_Employees_ReportsTo`
 							FOREIGN KEY (`ReportsTo`) REFERENCES `Employees`(`EmployeeID`)
@@ -42,6 +45,9 @@ CREATE TABLE `Categories` (
 						  `CategoryID` INT NOT NULL AUTO_INCREMENT,
 						  `CategoryName` VARCHAR(15) NOT NULL,
 						  `Description` TEXT NULL,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						 -- `Picture` LONGBLOB NULL,
 						  CONSTRAINT `PK_Categories` PRIMARY KEY (`CategoryID`)
 						) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -62,6 +68,9 @@ CREATE TABLE `Customers` (
 						  `Country` VARCHAR(15) NULL,
 						  `Phone` VARCHAR(24) NULL,
 						  `Fax` VARCHAR(24) NULL,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						  CONSTRAINT `PK_Customers` PRIMARY KEY (`CustomerID`)
 						) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -78,6 +87,9 @@ CREATE TABLE `Shippers` (
 						  `ShipperID` INT NOT NULL AUTO_INCREMENT,
 						  `CompanyName` VARCHAR(40) NOT NULL,
 						  `Phone` VARCHAR(24) NULL,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						  CONSTRAINT `PK_Shippers` PRIMARY KEY (`ShipperID`)
 						) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                         
@@ -95,6 +107,9 @@ CREATE TABLE `Suppliers` (
 						  `Phone` VARCHAR(24) NULL,
 						  `Fax` VARCHAR(24) NULL,
 						  `HomePage` TEXT NULL,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						  CONSTRAINT `PK_Suppliers` PRIMARY KEY (`SupplierID`)
 						) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -118,6 +133,9 @@ CREATE TABLE `Orders` (
 					  `ShipRegion` VARCHAR(15) NULL,
 					  `ShipPostalCode` VARCHAR(10) NULL,
 					  `ShipCountry` VARCHAR(15) NULL,
+                      `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                      `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 					  CONSTRAINT `PK_Orders` PRIMARY KEY (`OrderID`),
 					  CONSTRAINT `FK_Orders_Customers`
 						FOREIGN KEY (`CustomerID`) REFERENCES `Customers`(`CustomerID`)
@@ -151,6 +169,9 @@ CREATE TABLE `Products` (
 						  `UnitsOnOrder` SMALLINT NULL DEFAULT 0,
 						  `ReorderLevel` SMALLINT NULL DEFAULT 0,
 						  `Discontinued` TINYINT(1) NOT NULL DEFAULT 0,
+                          `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 						  CONSTRAINT `PK_Products` PRIMARY KEY (`ProductID`),
 						  CONSTRAINT `FK_Products_Suppliers`
 							FOREIGN KEY (`SupplierID`) REFERENCES `Suppliers`(`SupplierID`)
@@ -181,6 +202,9 @@ CREATE TABLE `OrderDetails` (
 							  `UnitPrice` DECIMAL(19,4) NOT NULL DEFAULT 0,
 							  `Quantity`  SMALLINT NOT NULL DEFAULT 1,
 							  `Discount`  DECIMAL(5,4) NOT NULL DEFAULT 0,
+                              `CreatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              `UpdatedDate` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
 							  CONSTRAINT `PK_Order_Details` PRIMARY KEY (`OrderID`, `ProductID`),
 							  CONSTRAINT `FK_Order_Details_Orders`
 								FOREIGN KEY (`OrderID`) REFERENCES `Orders`(`OrderID`),
