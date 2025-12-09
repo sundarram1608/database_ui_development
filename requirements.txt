@@ -1,0 +1,7 @@
+matplotlib
+mysql-connector-python
+numpy
+pandas
+pillow
+plotly
+streamlit
