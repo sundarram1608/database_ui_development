@@ -554,38 +554,102 @@ def check_for_primary_key_uniqueness(selected_table, uploaded_df):
     else:
         return 1
 
+# def validate_df_against_schema(df_uploaded: pd.DataFrame, table_column_details: pd.DataFrame):
+#     """Function to validate uploaded DataFrame against table schema"""
+    
+#     # Columns that should be ignored because database auto-handles them
+#     system_cols = ("CreatedDate", "UpdatedDate")
+
+#     # 1. Check for required columns (excluding system columns)
+#     expected_cols = [
+#         c for c in table_column_details["Field"].tolist()
+#         if c not in system_cols
+#     ]
+    
+#     # 1. Check for required columns
+#     # expected_cols = table_column_details["Field"].tolist()
+    
+#     uploaded_cols = df_uploaded.columns.tolist()
+#     # st.write(expected_cols)
+#     # st.write(uploaded_cols) 
+
+#     # Compare sets (exact, case-sensitive)
+#     missing_cols = [c for c in expected_cols if c not in uploaded_cols]
+#     # st.write(missing_cols)
+#     if missing_cols:
+#         st.error(f"Missing required columns:") 
+#         st.write(missing_cols)
+#     else:
+#         required_cols_msg = 1
+        
+#     # 2. Check for NOT NULL constraints
+#     not_null_columns = table_column_details.loc[table_column_details["Null"].str.upper() == "NO", "Field"].tolist()
+#     # Identify columns that have NaN or empty string where they shouldn’t
+#     columns_with_nulls = []
+#     for col in not_null_columns:
+#         if df_uploaded[col].isnull().sum()>0 or df_uploaded[col].isna().sum() or df_uploaded[col].eq("").sum()>0:
+#             columns_with_nulls.append(col)
+#     if columns_with_nulls:
+#         st.error("The below columns have null values while they are not supposed to have null values:")
+#         st.write(columns_with_nulls)
+#     else:
+#         not_null_msg = 1
+    
+#     return required_cols_msg, not_null_msg
+
+
+
 def validate_df_against_schema(df_uploaded: pd.DataFrame, table_column_details: pd.DataFrame):
     """Function to validate uploaded DataFrame against table schema"""
-    
-    # 1. Check for required columns
-    expected_cols = table_column_details["Field"].tolist()
-    uploaded_cols = df_uploaded.columns.tolist()
-    # st.write(expected_cols)
-    # st.write(uploaded_cols) 
 
-    # Compare sets (exact, case-sensitive)
+    # Columns that should be ignored because database auto-handles them
+    system_cols = ("CreatedDate", "UpdatedDate")
+
+    # 1. Check for required columns (excluding system columns)
+    expected_cols = [
+        c for c in table_column_details["Field"].tolist()
+        if c not in system_cols
+    ]
+
+    uploaded_cols = df_uploaded.columns.tolist()
+
     missing_cols = [c for c in expected_cols if c not in uploaded_cols]
-    # st.write(missing_cols)
     if missing_cols:
-        st.error(f"Missing required columns:") 
+        st.error("Missing required columns:")
         st.write(missing_cols)
+        required_cols_msg = 0
     else:
         required_cols_msg = 1
-        
-    # 2. Check for NOT NULL constraints
-    not_null_columns = table_column_details.loc[table_column_details["Null"].str.upper() == "NO", "Field"].tolist()
-    # Identify columns that have NaN or empty string where they shouldn’t
+
+    # 2. Check for NOT NULL constraints (excluding system columns)
+    not_null_columns = [
+        c for c in table_column_details.loc[
+            table_column_details["Null"].str.upper() == "NO", "Field"
+        ].tolist()
+        if c not in system_cols
+    ]
+
     columns_with_nulls = []
     for col in not_null_columns:
-        if df_uploaded[col].isnull().sum()>0 or df_uploaded[col].isna().sum() or df_uploaded[col].eq("").sum()>0:
-            columns_with_nulls.append(col)
+        # Only validate columns ACTUALLY present in the uploaded CSV
+        if col in df_uploaded:
+            if (
+                df_uploaded[col].isnull().sum() > 0
+                or df_uploaded[col].isna().sum() > 0
+                or df_uploaded[col].eq("").sum() > 0
+            ):
+                columns_with_nulls.append(col)
+
     if columns_with_nulls:
-        st.error("The below columns have null values while they are not supposed to have null values:")
+        st.error("The below columns have null values while they are NOT NULL in the database:")
         st.write(columns_with_nulls)
+        not_null_msg = 0
     else:
         not_null_msg = 1
-    
+
     return required_cols_msg, not_null_msg
+
+
 
 ##########################################################################################################################################################
 
@@ -681,7 +745,11 @@ def insert_data_into_db(selected_table,table_column_details, df_uploaded):
             new_df = new_df.drop(columns=bad_headers)
 
         # -- B. only keep columns that actually exist in the table
-        valid_cols = table_column_details["Field"].astype(str).tolist()
+        # valid_cols = table_column_details["Field"].astype(str).tolist()
+        valid_cols = [
+                        col for col in table_column_details["Field"].astype(str).tolist()
+                        if col not in ("CreatedDate", "UpdatedDate")
+                    ]
         cols = [c for c in new_df.columns if c in valid_cols]
         if not cols:
             st.error("None of the DataFrame columns match the table columns.")
@@ -751,6 +819,10 @@ def create_new_records(selected_table):
                 # column_constraint_df = pd.DataFrame(list(zip(columns, constraints, column_key, column_autoincr)), columns=['Column Header', 'Data Type', 'Key Details', 'Auto Increment'])
 
         # #Provide Instructions for CSV upload
+        # Remove audit columns so they are not expected in CSV
+        system_cols = ["CreatedDate", "UpdatedDate"]
+        table_column_details = table_column_details[~table_column_details["Field"].isin(system_cols)]
+        
         with st.popover("Data Upload Instructions"):
             st.warning(f"Ensure the {selected_table} data is in CSV format with the below listed details.")
             st.dataframe(table_column_details,hide_index=True,use_container_width=True)
@@ -1084,14 +1156,23 @@ def update_records(table_name, df_uploaded, table_column_details):
 def validate_df_against_schema_update(table_name, df_uploaded, table_column_details):
     """Function to validate uploaded DataFrame against table schema"""
     
-    # 1. Check for required columns
-    expected_cols = table_column_details["Field"].tolist()
+    # # 1. Check for required columns
+    # expected_cols = table_column_details["Field"].tolist()
+    
+    system_cols = ("CreatedDate", "UpdatedDate")
+    expected_cols = [
+                        c for c in table_column_details["Field"].tolist()
+                        if c not in system_cols
+                    ]
+
+    
     uploaded_cols = df_uploaded.columns.tolist()
     # st.write(expected_cols)
     # st.write(uploaded_cols) 
 
     # Compare sets (exact, case-sensitive)
     missing_cols = [c for c in expected_cols if c not in uploaded_cols]
+    
     # st.write(missing_cols)
     if missing_cols:
         st.error(f"Missing required columns:") 
@@ -1100,12 +1181,34 @@ def validate_df_against_schema_update(table_name, df_uploaded, table_column_deta
         required_cols_msg = 1
         
     # 2. Check for NOT NULL constraints
-    not_null_columns = table_column_details.loc[table_column_details["Null"].str.upper() == "NO", "Field"].tolist()
+    # not_null_columns = table_column_details.loc[table_column_details["Null"].str.upper() == "NO", "Field"].tolist()
+    not_null_columns = [
+                            c for c in table_column_details.loc[
+                                table_column_details["Null"].str.upper() == "NO", "Field"
+                            ].tolist()
+                            if c not in system_cols
+                        ]
+    
     # Identify columns that have NaN or empty string where they shouldn’t
     columns_with_nulls = []
+    # for col in not_null_columns:
+    #     if df_uploaded[col].isnull().sum()>0 or df_uploaded[col].isna().sum() or df_uploaded[col].eq("").sum()>0:
+    #         columns_with_nulls.append(col)
+            
+            
     for col in not_null_columns:
-        if df_uploaded[col].isnull().sum()>0 or df_uploaded[col].isna().sum() or df_uploaded[col].eq("").sum()>0:
+        # SAFETY CHECK – skip system columns or missing columns
+        if col not in df_uploaded.columns:
+            continue
+
+        if (
+            df_uploaded[col].isnull().sum() > 0
+            or df_uploaded[col].isna().sum() > 0
+            or df_uploaded[col].eq("").sum() > 0
+        ):
             columns_with_nulls.append(col)
+
+            
     if columns_with_nulls:
         st.error("The below columns have null values while they are not supposed to have null values:")
         st.write(columns_with_nulls)
@@ -1151,6 +1254,10 @@ def update_records_in_existing_table(selected_table,table_column_details):
     bulk_upload = ["Categories", "Customers", "Employees", "Shippers", "Suppliers"]
     if selected_table in bulk_upload:    
         # st.header("Update Categories from CSV")
+        # Remove audit columns so they are not expected in CSV
+        system_cols = ["CreatedDate", "UpdatedDate"]
+        table_column_details = table_column_details[~table_column_details["Field"].isin(system_cols)]
+
         with st.popover(f"Update Instructions for {selected_table}"):
             st.warning(f"Ensure the {selected_table} data is in CSV format with the below listed details.")
             st.dataframe(table_column_details,hide_index=True,use_container_width=True)
@@ -1196,6 +1303,10 @@ def update_records_in_existing_table(selected_table,table_column_details):
                     st.error(f"Unknown error occurred. {e}")
 
     elif selected_table == "OrderDetails":
+        # Remove audit columns so they are not expected in CSV
+        system_cols = ["CreatedDate", "UpdatedDate"]
+        table_column_details = table_column_details[~table_column_details["Field"].isin(system_cols)]
+                
         with st.popover(f"Update Instructions for {selected_table}"):
             st.warning(f"Ensure the {selected_table} data is in CSV format with the below listed details.")
             st.dataframe(table_column_details,hide_index=True,use_container_width=True)
@@ -1305,6 +1416,9 @@ def update_records_in_existing_table(selected_table,table_column_details):
                     conn.close()
 
     elif selected_table == "Orders":
+        # Remove audit columns so they are not expected in CSV
+        system_cols = ["CreatedDate", "UpdatedDate"]
+        table_column_details = table_column_details[~table_column_details["Field"].isin(system_cols)]
 
         with st.popover(f"Update Instructions for {selected_table}"):
             st.warning("Ensure the Orders data is correct.")
@@ -1423,6 +1537,9 @@ def update_records_in_existing_table(selected_table,table_column_details):
                     cursor.close()
                     conn.close()
     elif selected_table == "Products":
+        # Remove audit columns so they are not expected in CSV
+        system_cols = ["CreatedDate", "UpdatedDate"]
+        table_column_details = table_column_details[~table_column_details["Field"].isin(system_cols)]
 
         with st.popover(f"Update Instructions for {selected_table}"):
             st.warning("Ensure the Products data is correct.")
