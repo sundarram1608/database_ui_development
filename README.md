@@ -63,9 +63,9 @@ pip install -r requirements.txt
 ```
 <br>
 - Now,  Start the MYSQL Server from your settings. <br>
-- Open MYSQL Workbench and open the `database_creation.sql` and run all the codes.<br>
+- Open MYSQL Workbench and open the `database_creation.sql` and run all the codes. <br>
 - Database is created. <br>
-- Now, in the terminal, navigate to the folder containing `Home.py`.
+- Now, in the terminal, navigate to the folder containing `Home.py`. <br>
 
 ```bash
 cd "path to Home.py"
@@ -74,7 +74,8 @@ cd "path to Home.py"
 streamlit run Home.py
 ```
 <br>
-**The app is now up and running.**<br>
+
+**The app is now up and running.** <br>
 
 **Usage:**<br>
 Ensure that the folder hierarchy in app is maintained for succesful running of the application and also database is created in the MYSQL server.
