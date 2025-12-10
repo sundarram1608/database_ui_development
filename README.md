@@ -15,6 +15,7 @@ The repo consists of 3 folders & 2 files:<br>
 > database_creation_mysql<br>
 > reports <br>
 > requirements.txt <br>
+> dataset_sample.xlsx <br>
 > README.md <br>
 
 
@@ -32,7 +33,7 @@ The repo consists of 3 folders & 2 files:<br>
 **requirements.txt** <br>
 - This file contains the libraries necessary for application creation.<br>
 
-**dataset_sample.csv** <br>
+**dataset_sample.xlsx** <br>
 - This includes all the tables with data as sheets that would be created on running the Database creation SQL query.<br>
 
 **README.md** <br>
