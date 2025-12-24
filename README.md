@@ -10,12 +10,17 @@ This project presents the design and development of a comprehensive Data Managem
 •	UI Layer  - Streamlit for the user interface<br>
 
 ## Project Structure: <br>
-The repo consists of 3 folders & 2 files:<br>
+The repo consists of 3 folders & 3 files:<br>
 > app<br>
+
 > database_creation_mysql<br>
+
 > reports <br>
+
 > requirements.txt <br>
+
 > dataset_sample.xlsx <br>
+
 > README.md <br>
 
 
